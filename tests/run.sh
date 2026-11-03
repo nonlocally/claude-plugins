@@ -31,6 +31,10 @@ fresh_home() {
   unset XDG_CONFIG_HOME
 }
 
+mode() { # permission bits, GNU stat first (BSD stat -f means something else on Linux)
+  stat -c %a "$1" 2>/dev/null || stat -f %Lp "$1"
+}
+
 key_file() { echo "${XDG_CONFIG_HOME:-$HOME/.config}/nonlocally/market-key"; }
 
 put_key() { # write a key file the way save-market-key would
@@ -77,8 +81,8 @@ out=$(printf '  %s  \n' "$KEY" | "$SAVE" 2>&1)
 status=$?
 check "save: succeeds" test "$status" -eq 0
 check "save: writes exactly the key" test "$(cat "$(key_file)")" = "$KEY"
-check "save: file is private (600)" test "$(stat -f %Lp "$(key_file)" 2>/dev/null || stat -c %a "$(key_file)")" = 600
-check "save: folder is private (700)" test "$(stat -f %Lp "$(dirname "$(key_file)")" 2>/dev/null || stat -c %a "$(dirname "$(key_file)")")" = 700
+check "save: file is private (600)" test "$(mode "$(key_file)")" = 600
+check "save: folder is private (700)" test "$(mode "$(dirname "$(key_file)")")" = 700
 check "save: never prints the key" bash -c "! grep -q '$KEY' <<<'$out'"
 check "save: says where it saved" grep -q "nonlocally/market-key" <<<"$out"
 
