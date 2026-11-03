@@ -1,0 +1,74 @@
+#!/bin/sh
+# Call the nonlocally market's REST API with your saved key, for what the MCP tools do not cover
+# (admin actions such as minting, account and key management).
+#
+#   market-api GET /v1/me
+#   market-api POST /v1/admin/mint '{"account_id": "ac_...", "amount": 1000, "memo": "why"}'
+#   market-api POST /v1/contracts @contract.json
+#
+# The key reaches curl through its config on stdin, never on a command line. Every POST carries an
+# Idempotency-Key, printed to stderr: to retry a POST that failed or timed out, run the exact same
+# command with MARKET_IDEMPOTENCY_KEY=<that key>, and the market applies it at most once.
+set -eu
+
+usage() {
+  echo "usage: market-api GET|POST|PUT|DELETE /v1/<path> [JSON | @file]" >&2
+}
+
+base="${NONLOCALLY_MARKET_URL:-https://market.nonlocally.org}"
+file="${XDG_CONFIG_HOME:-$HOME/.config}/nonlocally/market-key"
+
+if [ $# -lt 2 ] || [ $# -gt 3 ]; then
+  usage
+  exit 2
+fi
+method=$(printf '%s' "$1" | tr '[:lower:]' '[:upper:]')
+path=$2
+body=${3:-}
+case "$method" in
+  GET | POST | PUT | DELETE) ;;
+  *)
+    usage
+    exit 2
+    ;;
+esac
+case "$path" in
+  /v1/*) ;;
+  *)
+    echo "market-api: the path must start with /v1/, for example /v1/me" >&2
+    exit 2
+    ;;
+esac
+
+if [ ! -r "$file" ]; then
+  echo "market-api: no key at $file. Sign in at https://research.nonlocally.org/keys," \
+    "create a key, and save it with save-market-key." >&2
+  exit 1
+fi
+key=$(tr -d ' \t\r\n' <"$file")
+if ! printf '%s' "$key" | grep -Eq '^bnty_[a-z2-7]{12}_[a-z2-7]{40}$'; then
+  echo "market-api: $file does not hold a market key (keys start with bnty_)." >&2
+  exit 1
+fi
+
+new_uuid() {
+  if command -v uuidgen >/dev/null 2>&1; then
+    uuidgen | tr '[:upper:]' '[:lower:]'
+  else
+    python3 -c 'import uuid; print(uuid.uuid4())'
+  fi
+}
+
+set -- --silent --show-error --fail-with-body --write-out '\n' --request "$method" \
+  --user-agent "nonlocally-plugin/0.1.0" --header "Accept: application/json"
+if [ -n "$body" ]; then
+  set -- "$@" --header "Content-Type: application/json" --data-binary "$body"
+fi
+if [ "$method" = POST ]; then
+  idempotency=${MARKET_IDEMPOTENCY_KEY:-$(new_uuid)}
+  set -- "$@" --header "Idempotency-Key: $idempotency"
+  echo "Idempotency-Key: $idempotency (to retry this exact request, rerun it with" \
+    "MARKET_IDEMPOTENCY_KEY=$idempotency)" >&2
+fi
+
+printf 'header = "Authorization: Bearer %s"\n' "$key" | curl --config - "$@" "$base$path"

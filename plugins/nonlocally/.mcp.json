@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "market": {
+      "type": "http",
+      "url": "https://market.nonlocally.org/mcp/",
+      "headersHelper": "sh \"${CLAUDE_PLUGIN_ROOT}/bin/market-headers\""
+    }
+  }
+}

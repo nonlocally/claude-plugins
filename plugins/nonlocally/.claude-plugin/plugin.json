@@ -1,0 +1,12 @@
+{
+  "name": "nonlocally",
+  "version": "0.1.0",
+  "description": "Work with nonlocally from Claude Code. First piece: the research market (market.nonlocally.org): find and solve Lean 4 bounty contracts, post contracts with TFT rewards (public, or private to people or mit.nonlocally.org groups), and as an admin mint TFT. MCP server `market` plus skill `market`.",
+  "author": {
+    "name": "nonlocally",
+    "url": "https://github.com/nonlocally"
+  },
+  "homepage": "https://research.nonlocally.org",
+  "repository": "https://github.com/nonlocally/claude-plugins",
+  "keywords": ["nonlocally", "lean", "bounties", "research-market", "tft", "mcp"]
+}

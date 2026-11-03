@@ -1,0 +1,55 @@
+#!/bin/sh
+# Save your nonlocally market key where the plugin reads it, readable only by you.
+#
+#   pbpaste | save-market-key            # macOS, after copying the key from research.nonlocally.org/keys
+#   save-market-key < downloaded-key.txt
+#   save-market-key --replace < new-key  # replace a key saved earlier
+#
+# Run in a terminal with no input, it asks for the key without showing it.
+set -eu
+
+replace=0
+case "${1:-}" in
+  --replace) replace=1 ;;
+  "") ;;
+  *)
+    echo "usage: save-market-key [--replace] < key" >&2
+    exit 2
+    ;;
+esac
+
+dir="${XDG_CONFIG_HOME:-$HOME/.config}/nonlocally"
+file="$dir/market-key"
+
+line=""
+if [ -t 0 ]; then
+  printf 'Paste your market key and press Enter (it will not be shown): ' >&2
+  stty -echo 2>/dev/null || true
+  IFS= read -r line || true
+  stty echo 2>/dev/null || true
+  printf '\n' >&2
+else
+  IFS= read -r line || true
+fi
+
+key=$(printf '%s' "$line" | tr -d ' \t\r\n')
+if ! printf '%s' "$key" | grep -Eq '^bnty_[a-z2-7]{12}_[a-z2-7]{40}$'; then
+  echo "That is not a market key: keys look like bnty_ followed by lowercase letters and digits." \
+    "Nothing was saved." >&2
+  exit 1
+fi
+if [ -e "$file" ] && [ "$replace" -ne 1 ]; then
+  echo "A key is already saved at $file. To replace it, run again with --replace." >&2
+  exit 1
+fi
+
+umask 077
+mkdir -p "$dir"
+chmod 700 "$dir"
+temporary="$file.new.$$"
+printf '%s\n' "$key" >"$temporary"
+chmod 600 "$temporary"
+mv -f "$temporary" "$file"
+
+echo "Saved your market key to $file (readable only by you)."
+echo "In Claude Code, run /mcp and reconnect \"market\", or start a new session, to use it."

@@ -1,0 +1,22 @@
+#!/bin/sh
+# Print the HTTP headers for the nonlocally market's MCP server, from your saved key.
+# Claude Code runs this (the plugin's headersHelper) each time it connects to the market, and reads
+# the JSON on stdout. The key stays in its file; nothing here writes it anywhere else.
+set -eu
+
+file="${XDG_CONFIG_HOME:-$HOME/.config}/nonlocally/market-key"
+
+if [ ! -r "$file" ]; then
+  echo "nonlocally market: no key at $file. Sign in at https://research.nonlocally.org/keys," \
+    "create a key, and save it with the plugin's save-market-key script." >&2
+  exit 1
+fi
+
+key=$(tr -d ' \t\r\n' <"$file")
+if ! printf '%s' "$key" | grep -Eq '^bnty_[a-z2-7]{12}_[a-z2-7]{40}$'; then
+  echo "nonlocally market: $file does not hold a market key (keys start with bnty_)." \
+    "Save one from https://research.nonlocally.org/keys there." >&2
+  exit 1
+fi
+
+printf '{"Authorization":"Bearer %s"}\n' "$key"
