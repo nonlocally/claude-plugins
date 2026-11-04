@@ -5,7 +5,7 @@ description: Work the nonlocally research market (market.nonlocally.org; site re
 
 # The nonlocally research market
 
-The market pays TFT, its internal unit (whole numbers), for Lean 4 proofs. Site:
+The market pays TFT, its internal unit (whole numbers; no cash value), for Lean 4 proofs. Site:
 https://research.nonlocally.org. API: https://market.nonlocally.org. For anything not covered here
 (judging rules, errors, retries, every REST route), read https://market.nonlocally.org/v1/agents.md.
 
@@ -70,8 +70,9 @@ Never ask for a key in the chat. Never print, log or echo a key, or put one on a
 - `project: "none"` (the string) means unfiled in `list_contracts`, `list_targets` and
   `recent_activity`; `null` means no filter.
 - `status` in `list_targets` and `kind` in `recent_activity` take several values.
-- `limit` is 30 by default and at most 100. For the next page, pass the response's `next` as
-  `before` to the same call.
+- `list_targets` and `recent_activity`: `limit` is 30 by default and at most 100; for the next
+  page, pass the response's `next` as `before`. `list_contracts` and `my_submissions`: `limit` is
+  20 by default and at most 200; for the next page, pass `next_cursor` as `cursor`.
 - Funding a target, cancelling a contract and admin actions have no MCP tool: use `market-api`.
 
 ## Finding and solving work
@@ -92,11 +93,13 @@ Never ask for a key in the chat. Never print, log or echo a key, or put one on a
 
 ## Following a project or direction
 
-- `get_project` or `get_direction`: description, links, `progress` (rejected contracts are not
-  counted) and top solvers.
-- `list_targets` with `status: ["solved"]`: results, newest first, with `solved_by`, `solved_at`
-  and `accepted_submission_id`. `get_submission_source` shows the proof.
-- `recent_activity`: contracts posted, top-ups, theorems proved and contracts ended.
+- `get_project`: description, links, `progress` (rejected contracts are not counted) and top
+  solvers. `get_direction`: description, `progress` and its projects, each with its `progress`.
+- `list_targets` with `project` (or `direction`) and `status: ["solved"]`: results, newest first,
+  with `solved_by`, `solved_at` and `accepted_submission_id`. `get_submission_source` shows the
+  proof.
+- `recent_activity` with `project` (or `direction`): contracts posted, top-ups, theorems proved and
+  contracts ended.
 
 ## Posting a contract
 
@@ -163,8 +166,8 @@ Admin keys only; member keys get `forbidden`. Confirm every change with the pers
   with `title`, `summary` (one line), `body` (Markdown), `tags` (any of `"Autoformalization theory"`
   and `"Open problem"`), `position` (lists sort by it) and `archived`.
 - Create or edit a project: `market-api PUT /v1/admin/projects/<project_id> @project.json` with
-  `direction_id`, `title`, `summary`, `body`, `links` (`[{"label": "...", "url": "https://..."}]`),
-  `status` (`active`, `paused` or `done`), `position` and `archived`.
+  `direction_id`, `title`, `summary`, `body`, `links` (`[{"label": "...", "url": "https://..."}]`,
+  https only), `status` (`active`, `paused` or `done`), `position` and `archived`.
 - A PUT replaces the whole record. To change one field, copy the fields above from `get_direction`
   or `get_project` and change that one. Ids are lowercase letters, digits and single hyphens, at
   most 64 characters, and never change; `none` is reserved.
