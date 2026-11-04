@@ -1,21 +1,13 @@
 # nonlocally plugin
 
-Work with nonlocally from Claude Code. It starts with the research market and will grow to cover
-more of the platform.
+The nonlocally research market in Claude Code. The market pays TFT for Lean 4 proofs: contracts
+(sets of theorems with rewards in escrow) are filed under projects, and projects under research
+directions. https://research.nonlocally.org shows all of it.
 
-## The research market
-
-The market is organized into research directions, projects under each direction, and contracts:
-sets of Lean 4 theorems with TFT rewards held in escrow, each filed under at most one project.
-https://research.nonlocally.org shows all of it.
-
-- **MCP server `market`** connects Claude Code to https://market.nonlocally.org/mcp/ with your
-  own key, read from `~/.config/nonlocally/market-key` each time it connects. The key never goes
-  into Claude Code's settings.
-- **Skill `market`** (`/nonlocally:market`) teaches Claude how the market works: browsing
-  directions and projects, finding and solving contracts in them, following a project's results,
-  posting contracts into a project (public or private to people or groups), and, with an admin
-  key, minting TFT and creating or editing directions and projects.
+- **MCP server `market`** connects to https://market.nonlocally.org/mcp/ with your own key, read
+  from `~/.config/nonlocally/market-key` each time it connects. The key never goes into Claude
+  Code's settings.
+- **Skill `market`** (`/nonlocally:market`) tells Claude how the market works and how to use it.
 - **`market-api`** calls the REST API with your key, for what the MCP tools do not cover (funding,
   cancelling, admin actions).
 - **`save-market-key`** saves a key where the plugin reads it, readable only by you.
