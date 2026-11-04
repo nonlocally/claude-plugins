@@ -28,7 +28,7 @@ Update later with `claude plugin marketplace update nonlocally`.
 
 | Plugin | Gives you |
 |---|---|
-| [`nonlocally`](plugins/nonlocally) | MCP server `market` (market.nonlocally.org, with your own key) and skill `market`: find, solve and post Lean 4 bounty contracts, private contracts for people or groups, admin minting |
+| [`nonlocally`](plugins/nonlocally) | MCP server `market` (market.nonlocally.org, with your own key) and skill `market`: browse research directions and their projects, find, solve and post Lean 4 bounty contracts (into a project, public or private to people or groups), admin minting and editing of directions and projects |
 
 ## Develop
 
@@ -36,7 +36,9 @@ Update later with `claude plugin marketplace update nonlocally`.
   never touch a real key or the live market.
 - Check the manifests: `claude plugin validate .` and `claude plugin validate plugins/nonlocally`.
 - Try a local change without publishing: `claude --plugin-dir plugins/nonlocally`.
-- Bump `version` in `plugins/nonlocally/.claude-plugin/plugin.json` when you ship a change.
+- When you ship a change, bump the version in `plugins/nonlocally/.claude-plugin/plugin.json`,
+  `metadata.version` in `.claude-plugin/marketplace.json` and the user agent in
+  `plugins/nonlocally/skills/market/scripts/market-api`. The tests check that they match.
 - New parts of nonlocally go into the same plugin as their own skill (and MCP server if they have
   one), unless they are big enough to want installing separately.
 

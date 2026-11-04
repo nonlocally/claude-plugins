@@ -121,6 +121,8 @@ check "api: GET prints the response" test "$(python3 -c 'import json,sys; print(
 last() { tail -1 "$T/log" | python3 -c "import json,sys; r=json.load(sys.stdin); print($1)"; }
 check "api: sends the key as a bearer token" test "$(last 'r["headers"]["authorization"]')" = "Bearer $KEY"
 check "api: names its client" bash -c "[[ '$(last 'r["headers"]["user-agent"]')' == nonlocally-plugin/* ]]"
+version=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["version"])' "$PLUGIN/.claude-plugin/plugin.json")
+check "api: names the plugin's version" test "$(last 'r["headers"]["user-agent"]')" = "nonlocally-plugin/$version"
 check "api: GET sends no idempotency key" test "$(last 'r["headers"].get("idempotency-key", "")')" = ""
 
 "$API" POST /v1/admin/mint '{"account_id":"ac_x","amount":5,"memo":"t"}' >/dev/null 2>"$T/err"
@@ -137,6 +139,12 @@ printf '{"title":"from a file"}' >"$T/body.json"
 "$API" POST /v1/contracts "@$T/body.json" >/dev/null 2>&1
 check "api: @file sends the file as the body" test "$(last 'r["body"]')" = '{"title":"from a file"}'
 
+# Admins save directions and projects, and file contracts, with PUT (a null project unfiles one).
+"$API" PUT /v1/admin/contracts/c_x/project '{"project_id":null}' >/dev/null 2>&1
+check "api: PUT sends a PUT" test "$(last 'r["method"]')" = PUT
+check "api: PUT forwards the JSON body" test "$(last 'r["body"]')" = '{"project_id":null}'
+check "api: PUT sends JSON" test "$(last 'r["headers"]["content-type"]')" = application/json
+
 out=$("$API" GET /v1/missing 2>/dev/null)
 status=$?
 check "api: an error status fails" test "$status" -ne 0
@@ -147,6 +155,12 @@ check "api: never prints the key" bash -c "! grep -q '$KEY' <<<'$out'"
 
 "$API" GET me >/dev/null 2>&1
 check "api: refuses a path that is not under /v1/" test $? -ne 0
+
+# ── manifests: one version for the plugin, its marketplace entry and market-api ────────────────
+
+marketplace_version=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["metadata"]["version"])' \
+  "$ROOT/.claude-plugin/marketplace.json")
+check "manifests: the marketplace has the plugin's version" test "$marketplace_version" = "$version"
 
 echo
 echo "passed=$passed failed=$failed"

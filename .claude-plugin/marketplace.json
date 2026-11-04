@@ -6,13 +6,13 @@
   },
   "metadata": {
     "description": "Claude Code plugins for working with nonlocally: the research market first, more of the platform over time.",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   "plugins": [
     {
       "name": "nonlocally",
       "source": "./plugins/nonlocally",
-      "description": "The research market (market.nonlocally.org) in Claude Code: MCP server `market` (read the key from ~/.config/nonlocally/market-key) and skill `market` for finding, solving and posting Lean 4 bounty contracts, private contracts, and admin minting."
+      "description": "The research market (market.nonlocally.org) in Claude Code: MCP server `market` (read the key from ~/.config/nonlocally/market-key) and skill `market` for research directions and their projects, finding, solving and posting Lean 4 bounty contracts (into a project, public or private), and admin minting and editing of directions and projects."
     }
   ]
 }
