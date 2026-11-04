@@ -1,7 +1,7 @@
 # nonlocally Claude Code plugins
 
-A Claude Code marketplace for working with nonlocally. It holds one plugin, `nonlocally`, which
-starts with the research market and will grow to cover more of the platform.
+A Claude Code marketplace for nonlocally. It holds one plugin, `nonlocally`, for the research
+market.
 
 ## Install
 
@@ -28,7 +28,7 @@ Update later with `claude plugin marketplace update nonlocally`.
 
 | Plugin | Gives you |
 |---|---|
-| [`nonlocally`](plugins/nonlocally) | MCP server `market` (market.nonlocally.org, with your own key) and skill `market`: browse research directions and their projects, find, solve and post Lean 4 bounty contracts (into a project, public or private to people or groups), admin minting and editing of directions and projects |
+| [`nonlocally`](plugins/nonlocally) | MCP server `market` (market.nonlocally.org, with your own key) and skill `market`: research directions, projects and Lean 4 bounty contracts |
 
 ## Develop
 

@@ -60,7 +60,7 @@ new_uuid() {
 }
 
 set -- --silent --show-error --fail-with-body --write-out '\n' --request "$method" \
-  --user-agent "nonlocally-plugin/0.2.0" --header "Accept: application/json"
+  --user-agent "nonlocally-plugin/0.2.1" --header "Accept: application/json"
 if [ -n "$body" ]; then
   set -- "$@" --header "Content-Type: application/json" --data-binary "$body"
 fi
